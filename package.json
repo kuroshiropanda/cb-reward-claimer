@@ -1,0 +1,30 @@
+{
+  "name": "cb-reward-claimer",
+  "version": "1.0.0",
+  "description": "cryptoblades reward claimer",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuroshiropanda/cb-reward-claimer.git"
+  },
+  "keywords": [
+    "cryptoblades",
+    "reward",
+    "claim"
+  ],
+  "author": "kuroshiropanda",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kuroshiropanda/cb-reward-claimer/issues"
+  },
+  "homepage": "https://github.com/kuroshiropanda/cb-reward-claimer#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "ethereumjs-tx": "^2.1.2",
+    "web3": "^1.5.2"
+  }
+}
