@@ -1,4 +1,4 @@
-export const CryptoBlades = [
+export default [
   {
     "anonymous": false,
     "inputs": [

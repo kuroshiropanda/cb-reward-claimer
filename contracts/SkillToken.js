@@ -1,4 +1,4 @@
-export const SkillToken = [
+export default [
   {
     "inputs": [],
     "stateMutability": "nonpayable",
