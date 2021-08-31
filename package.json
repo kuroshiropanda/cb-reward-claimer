@@ -24,7 +24,7 @@
   "homepage": "https://github.com/kuroshiropanda/cb-reward-claimer#readme",
   "dependencies": {
     "dotenv": "^10.0.0",
-    "ethereumjs-tx": "^2.1.2",
+    "ethereumjs-tx": "^1.3.7",
     "web3": "^1.5.2"
   }
 }

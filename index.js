@@ -1,12 +1,11 @@
 import dotenv from 'dotenv';
-import EthereumTx from 'ethereumjs-tx';
+import Tx from 'ethereumjs-tx';
+import { readFile } from 'fs/promises';
 import Web3 from 'web3';
 import CryptoBlades from './contracts/CryptoBlades.js';
 import SkillToken from './contracts/SkillToken.js';
 
 dotenv.config();
-
-const Tx = EthereumTx.Transaction;
 
 const web3 = new Web3('https://bsc-dataseed1.binance.org/');
 const defaultAddress = '0x0000000000000000000000000000000000000000';
@@ -19,6 +18,7 @@ const account = process.env.ADDRESS || '';
 const key = process.env.KEY || '';
 
 const claim = async () => {
+  const tax = JSON.parse(await readFile('tax.json', { encoding: 'utf-8' }));
   if (!account || account === '') {
     throw new Error('can\'t find ADDRESS on .env file');
   }
@@ -35,7 +35,7 @@ const claim = async () => {
     const balance = web3.utils.fromWei(await TokenContract.methods.balanceOf(gameAddress).call(), 'ether');
     const time = new Date();
     process.stdout.write(
-      `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${balance}\r`
+      `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${parseFloat(balance)}\r`
     );
     if (parseFloat(balance) >= parseFloat(accountBalance)) {
       clearInterval(interval);
@@ -62,7 +62,7 @@ const claim = async () => {
 
       const txReceipt = await web3.eth.sendSignedTransaction(raw);
       console.log(`https://bscscan.com/tx/${txReceipt.transactionHash}`);
-      if (txReceipt.status) {
+      if (txReceipt.status && tax.accept) {
         const data = await TokenContract.methods.transfer(taxAddress, web3.utils.toWei(taxFee.toString(), 'ether')).encodeABI();
 
         const txCount = await web3.eth.getTransactionCount(account);
