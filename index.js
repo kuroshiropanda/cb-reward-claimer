@@ -28,7 +28,7 @@ const claim = async () => {
   }
   const accountTokenReward = await GameContract.methods.getTokenRewardsFor(account).call();
   const accountBalance = web3.utils.fromWei(accountTokenReward, 'ether');
-  console.log(`current account balance: ${accountBalance}`);
+  console.log(`account claimable reward: ${accountBalance}`);
   const taxFee = parseFloat(accountBalance) * 0.01;
 
   const interval = setInterval(async () => {
