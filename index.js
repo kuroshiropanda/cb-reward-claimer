@@ -39,7 +39,7 @@ const claim = async () => {
     );
     if (parseFloat(balance) >= parseFloat(accountBalance)) {
       clearInterval(interval);
-      console.log(`${time.getHours}:${time.getMinutes()}:${time.getSeconds()} ${balance} claiming reward`);
+      console.log(`${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${balance} claiming reward`);
 
       const data = await GameContract.methods.claimTokenRewards().encodeABI();
 
@@ -50,7 +50,7 @@ const claim = async () => {
         to: gameAddress,
         data,
         value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
-        gasLimit: web3.utils.toHex(96556),
+        gasLimit: web3.utils.toHex(500000),
         gasPrice: web3.utils.toHex(web3.utils.toWei('5', 'gwei')),
       };
 
