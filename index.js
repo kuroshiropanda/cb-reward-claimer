@@ -37,11 +37,14 @@ const claim = async () => {
     process.stdout.write(
       `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${parseFloat(balance)}\r`
     );
-    if (parseFloat(balance) >= parseFloat(accountBalance)) {
+    if (parseFloat(balance) > parseFloat(accountBalance)) {
       clearInterval(interval);
-      console.log(`${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${balance} claiming reward`);
+      console.log(
+        `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} claiming ${accountBalance} from reward pool balance ${balance}`
+      );
 
       const data = await GameContract.methods.claimTokenRewards().encodeABI();
+      const gasLimit = await GameContract.methods.claimTokenRewards().estimateGas({ from: account, gas: 500000 });
 
       const txCount = await web3.eth.getTransactionCount(account);
       const txObject = {
@@ -50,7 +53,7 @@ const claim = async () => {
         to: gameAddress,
         data,
         value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
-        gasLimit: web3.utils.toHex(500000),
+        gasLimit: web3.utils.toHex(gasLimit),
         gasPrice: web3.utils.toHex(web3.utils.toWei('5', 'gwei')),
       };
 
@@ -88,7 +91,7 @@ const claim = async () => {
         }
       }
     }
-  }, 1000);
+  }, 500);
 };
 
 claim();

@@ -1149,6 +1149,11 @@ export default [
         "internalType": "uint32",
         "name": "num",
         "type": "uint32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "chosenElement",
+        "type": "uint8"
       }
     ],
     "name": "mintWeaponN",
@@ -1157,7 +1162,13 @@ export default [
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "chosenElement",
+        "type": "uint8"
+      }
+    ],
     "name": "mintWeapon",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -1169,6 +1180,11 @@ export default [
         "internalType": "uint32",
         "name": "num",
         "type": "uint32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "chosenElement",
+        "type": "uint8"
       }
     ],
     "name": "mintWeaponNUsingStakedSkill",
@@ -1177,7 +1193,13 @@ export default [
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "chosenElement",
+        "type": "uint8"
+      }
+    ],
     "name": "mintWeaponUsingStakedSkill",
     "outputs": [],
     "stateMutability": "nonpayable",
