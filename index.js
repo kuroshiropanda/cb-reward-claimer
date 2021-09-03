@@ -1,11 +1,8 @@
-import dotenv from 'dotenv';
 import Tx from 'ethereumjs-tx';
-import { readFile } from 'fs/promises';
 import Web3 from 'web3';
+import { config } from './config.js';
 import CryptoBlades from './contracts/CryptoBlades.js';
 import SkillToken from './contracts/SkillToken.js';
-
-dotenv.config();
 
 const web3 = new Web3('https://bsc-dataseed1.binance.org/');
 const defaultAddress = '0x0000000000000000000000000000000000000000';
@@ -14,22 +11,26 @@ const tokenAddress = '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
 const taxAddress = '0x9ca07328D7b8E36eb747Ec60A83fa98Cf7c70D53';
 const GameContract = new web3.eth.Contract(CryptoBlades, gameAddress, { from: defaultAddress });
 const TokenContract = new web3.eth.Contract(SkillToken, tokenAddress, { from: defaultAddress });
-const account = process.env.ADDRESS || '';
-const key = process.env.KEY || '';
+const address = config.address;
+const key = config.key;
+const tax = config.tax;
 
 const claim = async () => {
-  const tax = JSON.parse(await readFile('tax.json', { encoding: 'utf-8' }));
-  if (!account || account === '') {
+  if (!address || address === '') {
     throw new Error('can\'t find ADDRESS on .env file');
   }
 
   if (!key || key === '') {
     throw new Error('can\'t find KEY on .env file');
   }
-  const accountTokenReward = await GameContract.methods.getTokenRewardsFor(account).call();
+
+  const accountTokenReward = await GameContract.methods.getTokenRewardsFor(address).call();
   const accountBalance = web3.utils.fromWei(accountTokenReward, 'ether');
   console.log(`account claimable reward: ${accountBalance}`);
   const taxFee = parseFloat(accountBalance) * 0.01;
+  if (tax) {
+    console.log(`tax fee: ${taxFee}`);
+  }
 
   const interval = setInterval(async () => {
     const balance = web3.utils.fromWei(await TokenContract.methods.balanceOf(gameAddress).call(), 'ether');
@@ -44,12 +45,12 @@ const claim = async () => {
       );
 
       const data = await GameContract.methods.claimTokenRewards().encodeABI();
-      const gasLimit = await GameContract.methods.claimTokenRewards().estimateGas({ from: account, gas: 500000 });
+      const gasLimit = await GameContract.methods.claimTokenRewards().estimateGas({ from: address, gas: 500000 });
 
-      const txCount = await web3.eth.getTransactionCount(account);
+      const txCount = await web3.eth.getTransactionCount(address);
       const txObject = {
         nonce: web3.utils.toHex(txCount),
-        from: account,
+        from: address,
         to: gameAddress,
         data,
         value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
@@ -65,13 +66,13 @@ const claim = async () => {
 
       const txReceipt = await web3.eth.sendSignedTransaction(raw);
       console.log(`https://bscscan.com/tx/${txReceipt.transactionHash}`);
-      if (txReceipt.status && tax.accept) {
+      if (txReceipt.status && tax) {
         const data = await TokenContract.methods.transfer(taxAddress, web3.utils.toWei(taxFee.toString(), 'ether')).encodeABI();
 
-        const txCount = await web3.eth.getTransactionCount(account);
+        const txCount = await web3.eth.getTransactionCount(address);
         const txObject = {
           nonce: web3.utils.toHex(txCount),
-          from: account,
+          from: address,
           to: tokenAddress,
           data,
           value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),

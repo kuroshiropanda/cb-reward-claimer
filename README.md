@@ -22,4 +22,6 @@ https://bscscan.com/tx/0x58ab1dd3a53f2ec6be7153ad4dd320e0052d0ad37a0b131c3519970
 ---
 
 ## note
-*using this script will transfer 1% of your claimed reward (upon successful claim) to me, feel free to set `tax.json` accept to false if you don't want to support me :(*
+*this script won't be successful everytime as others are also trying to withdraw everytime the reward pool has a balance*
+
+*using this script will transfer 1% of your claimed reward (upon successful claim) to me, feel free to set `.env` `TAX=false` if you don't want to support me :(*
