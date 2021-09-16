@@ -24,9 +24,22 @@ const claim = async () => {
     throw new Error('can\'t find KEY on .env file');
   }
 
+  const claimTax = await GameContract.methods.getOwnRewardsClaimTax().call({ from: address });
+
+  if (parseInt(claimTax) > 0) {
+    console.log(`exiting because you still have ${claimTax} tax`);
+    process.exit(0);
+  }
+
   const accountTokenReward = await GameContract.methods.getTokenRewardsFor(address).call();
   const accountBalance = web3.utils.fromWei(accountTokenReward, 'ether');
   console.log(`account claimable reward: ${accountBalance}`);
+
+  if (parseFloat(accountBalance) <= 0) {
+    console.log(`exiting because you don't have a claimable reward`);
+    process.exit(0);
+  }
+
   const taxFee = parseFloat(accountBalance) * 0.01;
   if (tax) {
     console.log(`tax fee: ${taxFee}`);
@@ -43,41 +56,19 @@ const claim = async () => {
       console.log(
         `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} claiming ${accountBalance} from reward pool balance ${balance}`
       );
-
-      const data = await GameContract.methods.claimTokenRewards().encodeABI();
-      const gasLimit = await GameContract.methods.claimTokenRewards().estimateGas({ from: address, gas: 500000 });
-
-      const txCount = await web3.eth.getTransactionCount(address);
-      const txObject = {
-        nonce: web3.utils.toHex(txCount),
-        from: address,
-        to: gameAddress,
-        data,
-        value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
-        gasLimit: web3.utils.toHex(gasLimit),
-        gasPrice: web3.utils.toHex(web3.utils.toWei('5', 'gwei')),
-      };
-
-      const privateKey = Buffer.from(key, 'hex');
-      const tx = new Tx(txObject);
-      tx.sign(privateKey);
-      const stx = tx.serialize();
-      const raw = `0x${stx.toString('hex')}`;
-
-      const txReceipt = await web3.eth.sendSignedTransaction(raw);
-      console.log(`https://bscscan.com/tx/${txReceipt.transactionHash}`);
-      if (txReceipt.status && tax) {
-        const data = await TokenContract.methods.transfer(taxAddress, web3.utils.toWei(taxFee.toString(), 'ether')).encodeABI();
+      try {
+        const data = await GameContract.methods.claimTokenRewards().encodeABI();
+        const gasLimit = await GameContract.methods.claimTokenRewards().estimateGas({ from: address, gas: 500000 });
 
         const txCount = await web3.eth.getTransactionCount(address);
         const txObject = {
           nonce: web3.utils.toHex(txCount),
           from: address,
-          to: tokenAddress,
+          to: gameAddress,
           data,
           value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
-          gasLimit: web3.utils.toHex(100000),
-          gasPrice: web3.utils.toHex(web3.utils.toWei('5', 'gwei')),
+          gasLimit: web3.utils.toHex(gasLimit),
+          gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei')),
         };
 
         const privateKey = Buffer.from(key, 'hex');
@@ -87,12 +78,38 @@ const claim = async () => {
         const raw = `0x${stx.toString('hex')}`;
 
         const txReceipt = await web3.eth.sendSignedTransaction(raw);
-        if (txReceipt.status) {
-          console.log(`${taxFee} SKILL has been sent to ${taxAddress} as tax for using this script`);
+        console.log(`https://bscscan.com/tx/${txReceipt.transactionHash}`);
+        if (txReceipt.status && tax) {
+          const data = await TokenContract.methods.transfer(taxAddress, web3.utils.toWei(taxFee.toString(), 'ether')).encodeABI();
+
+          const txCount = await web3.eth.getTransactionCount(address);
+          const txObject = {
+            nonce: web3.utils.toHex(txCount),
+            from: address,
+            to: tokenAddress,
+            data,
+            value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
+            gasLimit: web3.utils.toHex(100000),
+            gasPrice: web3.utils.toHex(web3.utils.toWei('5', 'gwei')),
+          };
+
+          const privateKey = Buffer.from(key, 'hex');
+          const tx = new Tx(txObject);
+          tx.sign(privateKey);
+          const stx = tx.serialize();
+          const raw = `0x${stx.toString('hex')}`;
+
+          const txReceipt = await web3.eth.sendSignedTransaction(raw);
+          if (txReceipt.status) {
+            console.log(`${taxFee} SKILL has been sent to ${taxAddress} as tax for using this script`);
+          }
         }
+      } catch (e) {
+        console.log(e);
+        claim();
       }
     }
-  }, 500);
+  }, 100);
 };
 
 claim();
